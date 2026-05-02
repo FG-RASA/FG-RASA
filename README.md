@@ -2,7 +2,7 @@
   <img src="static/images/fg_rssa_header.gif" alt="FG-RSSA animated header" width="88%">
 </p>
 
-**[Paper](static/pdfs/paper.pdf)** | **[Code](https://anonymous.4open.science/r/FG-RSSA-code-2D45/README.md)** | **[Dataset](https://drive.google.com/file/d/1mSpWMD0sPyM1qY8sSMq9dmE1rbFfirPV/view?usp=sharing)**
+**[Paper](static/pdfs/paper.pdf)** | **[Code](https://github.com/FG-RASA/FG-RASA-code)** | **[Dataset](https://drive.google.com/file/d/1mSpWMD0sPyM1qY8sSMq9dmE1rbFfirPV/view?usp=sharing)**
 
 ## Table of Contents
 
@@ -117,7 +117,7 @@ We evaluate the proposed framework on an expanded multi-source dataset collectio
 
 The full implementation of the fine-grained contrastive learning framework is currently being organized for open-source release. All resources will be fully open-sourced upon formal acceptance of the paper.
 
-Anonymous review repository: [Code](https://anonymous.4open.science/r/FG-RSSA-code-2D45/README.md)
+Code repository: [FG-RASA-code](https://github.com/FG-RASA/FG-RASA-code)
 
 <a id="experimental-results"></a>
 ## Experimental Results
