@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FG-RSSA: Fine-Grained Contrastive Learning for Robotic Surgery Skill Assessment</title>
+  <meta name="description" content="FG-RSSA is a fine-grained contrastive learning framework for robotic surgery skill assessment through joint instrument-tissue modeling.">
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0d1b30;
+      --panel: rgba(11, 26, 48, 0.78);
+      --panel-strong: rgba(10, 23, 42, 0.92);
+      --line: rgba(148, 163, 184, 0.22);
+      --text: #e5eefb;
+      --muted: #9cb0c9;
+      --accent: #62c1ff;
+      --accent-2: #8d7dff;
+      --accent-3: #61e2d1;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(98, 193, 255, 0.18), transparent 32%),
+        radial-gradient(circle at 85% 15%, rgba(141, 125, 255, 0.16), transparent 28%),
+        linear-gradient(180deg, #081221 0%, #07111f 46%, #0a1424 100%);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .site-shell {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .site-shell::before,
+    .site-shell::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 38rem;
+      height: 38rem;
+      pointer-events: none;
+      filter: blur(80px);
+      opacity: 0.18;
+      z-index: 0;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+
+    .site-shell::before {
+      top: -8rem;
+      left: -10rem;
+      background: radial-gradient(circle, rgba(98, 193, 255, 0.9), transparent 60%);
+    }
+
+    .site-shell::after {
+      top: 6rem;
+      right: -12rem;
+      background: radial-gradient(circle, rgba(129, 120, 255, 0.85), transparent 60%);
+      animation-duration: 24s;
+    }
+
+    @keyframes drift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(2rem, 2rem, 0) scale(1.08); }
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(7, 17, 31, 0.7);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    }
+
+    .topbar-inner,
+    .hero-inner,
+    .section-inner,
+    .footer-inner {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(98, 193, 255, 0.2), rgba(141, 125, 255, 0.18));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      color: var(--muted);
+      font-size: 0.94rem;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      position: relative;
+      padding: 56px 0 36px;
+    }
+
+    .hero-card {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(140deg, rgba(10, 26, 49, 0.96), rgba(10, 29, 56, 0.82)),
+        radial-gradient(circle at 12% 18%, rgba(98, 193, 255, 0.22), transparent 26%),
+        radial-gradient(circle at 88% 22%, rgba(141, 125, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 68% 80%, rgba(97, 226, 209, 0.12), transparent 28%);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      overflow: hidden;
+      padding: 34px;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.04) 20%, transparent 36%),
+        linear-gradient(180deg, transparent 0%, rgba(98, 193, 255, 0.06) 100%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .hero-actions {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(98, 193, 255, 0.45);
+      background: rgba(98, 193, 255, 0.12);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, rgba(98, 193, 255, 0.24), rgba(141, 125, 255, 0.18));
+      border-color: rgba(98, 193, 255, 0.36);
+    }
+
+    .hero-band {
+      margin-top: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: #ffffff;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-band img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      background: #ffffff;
+    }
+
+    .section {
+      padding: 26px 0 56px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-heading {
+      margin: 0 0 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2.6vw, 2.2rem);
+      line-height: 1.15;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+    }
+
+    .copy-block {
+      padding: 24px;
+    }
+
+    .copy-block p {
+      margin: 0 0 14px;
+      color: #dbe7f7;
+    }
+
+    .copy-block p:last-child { margin-bottom: 0; }
+
+    .stats-grid,
+    .cards-grid,
+    .media-grid,
+    .comparison-grid,
+    .cam-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .stat-card,
+    .feature-card,
+    .result-card,
+    .discussion-card {
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.7rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .cards-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .feature-card h3,
+    .result-card h3,
+    .discussion-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .feature-card p,
+    .result-card p,
+    .discussion-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .figure-panel {
+      padding: 18px;
+      margin-top: 18px;
+      background: #ffffff;
+    }
+
+    .figure-panel img {
+      width: 100%;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .caption {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+    .media-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .media-card {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+      text-align: center;
+    }
+
+    .media-card img,
+    .media-card video {
+      width: 100%;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .comparison-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .results-carousel {
+      margin-top: 18px;
+    }
+
+    .results-carousel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .results-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .results-control {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .results-viewport {
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    .results-track {
+      display: flex;
+      transition: transform 0.45s ease;
+      will-change: transform;
+    }
+
+    .results-slide {
+      min-width: 100%;
+      padding: 0;
+    }
+
+    .results-slide-card {
+      padding: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+      min-height: 760px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .results-slide-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+
+    .results-slide-card p {
+      margin: 0 0 16px;
+      color: #dbe7f7;
+    }
+
+    .results-media-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .results-media-single {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex: 1;
+    }
+
+    .results-slide-card .media-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .results-slide-card .media-card img {
+      object-fit: contain;
+    }
+
+    .results-media-single .media-card {
+      width: min(720px, 100%);
+    }
+
+    .results-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .results-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+    }
+
+    .results-dot.is-active {
+      background: var(--accent);
+    }
+
+    .cam-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .cam-pair {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .cam-pair-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .cam-pair-grid img {
+      background: #ffffff;
+      border-radius: 12px;
+    }
+
+    .cam-pair small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .section-anchor-nav {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.88rem;
+    }
+
+    .chip:hover {
+      color: var(--text);
+      border-color: rgba(98, 193, 255, 0.35);
+    }
+
+    .footer {
+      padding: 40px 0 56px;
+      color: var(--muted);
+    }
+
+    .footer-inner {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid,
+      .stats-grid,
+      .cards-grid,
+      .media-grid,
+      .comparison-grid,
+      .cam-grid,
+      .results-media-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card { padding: 24px; }
+      .hero-copy h1 { font-size: clamp(1.85rem, 7vw, 3rem); }
+      .cam-pair-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 0;
+      }
+
+      .nav {
+        gap: 12px;
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding-top: 28px;
+      }
+
+      .hero-grid {
+        gap: 22px;
+      }
+
+      .hero-card {
+        border-radius: 22px;
+      }
+
+      .hero-band img {
+        max-height: 180px;
+      }
+
+      .section {
+        padding-bottom: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#top">
+          <span class="brand-mark">
+            <img src="static/images/fg_rssa_icon.png" alt="FG-RSSA icon">
+          </span>
+          <span class="brand-text">
+            <strong>FG-RSSA</strong>
+            <span>Project Page</span>
+          </span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#abstract">Abstract</a>
+          <a href="#dataset">Dataset</a>
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+          <a href="#discussions">Discussions</a>
+          <a href="#cam">CAM</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-card reveal">
+            <div class="hero-band">
+              <img src="static/images/fg_rssa_header.gif" alt="FG-RSSA header animation">
+            </div>
+            <div class="hero-actions">
+              <a class="button primary" href="static/pdfs/paper.pdf" target="_blank" rel="noreferrer">Paper</a>
+              <a class="button" href="https://anonymous.4open.science/r/FG-RSSA-code-2D45/README.md" target="_blank" rel="noreferrer">Code</a>
+              <a class="button" href="https://drive.google.com/file/d/1mSpWMD0sPyM1qY8sSMq9dmE1rbFfirPV/view?usp=sharing" target="_blank" rel="noreferrer">Dataset</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="abstract">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>Abstract</h2>
+          </div>
+          <div class="panel copy-block reveal">
+            <p>In robot-assisted surgery, precise and objective surgical skill assessment is essential for ensuring patient safety, optimizing surgeon training, and advancing semi-autonomous surgical systems. Existing automated evaluation methods generally depend on coarse, video-level global features and often fail to capture the fine-grained nuances of surgical maneuvers. FG-RSSA addresses this by decomposing skill assessment into three critical dimensions: instrument manipulation, tissue handling, and surgical field clarity. The framework combines segmentation-guided spatiotemporal motion modeling, intra-video tissue-context representation, and query-reference cross-attention to predict relative score differences and support continuous skill-score regression. Experiments across JIGSAWS, ROSMA, HeiChole, a private SHURUI robot-assisted cholecystectomy dataset, and a private hernia repair suturing dataset show state-of-the-art or competitive performance on MAE and SRCC. The work also constructs a surgical instrument mask dataset with 201,318 annotated frames spanning simulated and clinical videos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="dataset">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>Dataset Generation</h2>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Multi-Source Surgical Video Collection</h3>
+            <p>This study constructs and uses a multi-source surgical skill assessment dataset collection to systematically evaluate the proposed fine-grained instrument-tissue visual modeling framework. The collection covers three surgical settings: robot-assisted surgical training tasks, conventional laparoscopic clinical surgery, and real robot-assisted clinical surgery.</p>
+            <p>First, for robot-assisted surgical training, we used two da Vinci-based training datasets: JIGSAWS and ROSMA. JIGSAWS is a widely used public benchmark for surgical skill assessment and includes three standardized bench-top training tasks: Knot Tying, Needle Passing, and Suturing. ROSMA was collected using the da Vinci Research Kit and includes three robot-assisted training tasks: Post and Sleeve, Pea on a Peg, and Wire Chaser.</p>
+            <p>Second, for conventional laparoscopic clinical surgery, we used the public HeiChole dataset and a private hernia repair suturing dataset. HeiChole is a conventional laparoscopic cholecystectomy dataset and includes two key surgical phases: Calot Triangle Dissection and Gallbladder Dissection. The private hernia repair suturing dataset was included to provide additional validation in real laparoscopic clinical scenarios.</p>
+            <p>Finally, for real robot-assisted clinical surgery, we added a private SHURUI robot-assisted cholecystectomy dataset. This dataset was collected using the SHURUI surgical robotic system in China and was divided into Calot Triangle Dissection and Gallbladder Dissection according to the phase definitions used in HeiChole. It was used as an independent external validation set to evaluate the model's generalization ability in real robot-assisted clinical scenarios.</p>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/fig1.png" alt="Dataset overview figure">
+            <div class="caption">Fig. 1. Dataset composition, representative frames, duration distributions, scoring systems, and experimental settings.</div>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>High-Quality Surgical Instrument Mask Dataset via SAM2 with manual refinement</h3>
+            <p>We constructed a large-scale surgical instrument mask dataset with <strong>201,318</strong> annotated frames from both simulated training tasks and clinical surgical videos. SAM2 was used as an offline initialization tool to generate preliminary instrument masks, followed by manual verification and refinement to correct missing regions, false positives, and boundary errors.</p>
+            <p>To assess annotation quality, we performed a quality audit using the manual correction rate and Dice similarity between the initial SAM2 masks and the refined masks. For simulation tasks, the manual correction rate was <strong>2.34%-5.36%</strong>, with Dice scores of <strong>89.36%-93.49%</strong>. For clinical scenarios, the correction rate increased to <strong>7.14%-9.87%</strong>, with Dice scores of <strong>86.52%-88.37%</strong>. These quality-controlled masks provide instrument-region priors for segmentation-guided feature reweighting in our surgical skill assessment framework.</p>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/fig3.png" alt="SAM2 workflow figure">
+            <div class="caption">Fig. 3. Workflow for constructing the SSA-oriented surgical instrument mask dataset using SAM2 and expert refinement.</div>
+          </div>
+
+          <div class="media-grid reveal">
+            <div class="media-card"><img src="static/images/video_gifs/video1.gif" alt="SAM2 demo GIF 1"></div>
+            <div class="media-card"><img src="static/images/video_gifs/video2.gif" alt="SAM2 demo GIF 2"></div>
+            <div class="media-card"><img src="static/images/video_gifs/video3.gif" alt="SAM2 demo GIF 3"></div>
+            <div class="media-card"><img src="static/images/video_gifs/video4.gif" alt="SAM2 demo GIF 4"></div>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Data Availability</h3>
+            <p>We have released part of the private hernia repair suturing data and the SHURUI robot-assisted simulated clinical data through the link below. More data and related resources will be progressively updated. The complete dataset, instrument mask annotations, and full joint instrument-tissue modeling framework will be made available upon formal acceptance of the paper, subject to applicable privacy and data-use restrictions.</p>
+            <div class="hero-actions" style="margin-top:16px;">
+              <a class="button primary" href="https://drive.google.com/file/d/1mSpWMD0sPyM1qY8sSMq9dmE1rbFfirPV/view?usp=sharing" target="_blank" rel="noreferrer">Dataset Access</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="method">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>Methodology</h2>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/fig2.png" alt="Method framework figure">
+            <div class="caption">Fig. 2. Overall method framework, including surgical scene decomposition, challenges, solutions, and the fine-grained contrastive architecture.</div>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Key Contributions</h3>
+            <p>Building upon reference-video-based contrastive regression, we propose a fine-grained visual modeling framework for surgical skill assessment in robot-assisted minimally invasive surgery. The framework integrates instrument-region guidance, frame-level tissue-context representation, and temporal process modeling to capture complementary visual cues related to instrument manipulation, tissue interaction, and surgical-field appearance.</p>
+            <p>1. <strong>Multi-Source Surgical Video Collection and Instrument Mask Annotations</strong></p>
+            <p>We construct a large-scale multi-source surgical video collection for robot-assisted surgical skill assessment. The collection includes robotic simulation training tasks, conventional laparoscopic clinical videos, and real robot-assisted clinical surgery videos. In addition, we provide <strong>201,318</strong> surgical instrument mask annotations generated using SAM2 and refined through manual verification. The dataset, instrument mask annotations, and related resources will be made available on our project homepage upon acceptance, subject to applicable privacy and data-use restrictions.</p>
+            <p>2. <strong>Fine-Grained Instrument-Tissue Visual Modeling</strong></p>
+            <p>We propose a fine-grained visual modeling framework that integrates instrument-region-guided motion representation with frame-level tissue-context representation. An I3D-based dynamic branch extracts snippet-level motion features, while an auxiliary segmentation branch trained with quality-controlled instrument masks provides instrument-region guidance. In parallel, a ResNet-34-based tissue-context branch extracts frame-level appearance and surgical-scene contextual features related to tissue structures, instrument-tissue interaction regions, and surgical-field appearance. By combining these complementary cues, the proposed framework better captures fine-grained visual factors associated with surgical skill.</p>
+            <p>3. <strong>Multi-Source Dataset Validation</strong></p>
+            <p>We evaluate the proposed framework on an expanded multi-source dataset collection covering three surgical settings: robot-assisted surgical training, conventional laparoscopic clinical surgery, and robot-assisted clinical surgery. JIGSAWS and ROSMA are used to assess skill perception in standardized robotic training tasks. HeiChole and a private hernia repair suturing dataset are used to evaluate adaptability and robustness under realistic clinical visual complexity. The SHURUI robot-assisted cholecystectomy dataset is used as an independent external validation set to further assess generalization in real robot-assisted clinical scenarios. This progressive validation design enables a more comprehensive assessment across different surgical platforms, operative tasks, and levels of clinical realism.</p>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Code Availability</h3>
+            <p>The full implementation of the fine-grained contrastive learning framework is being organized for open-source release. Anonymous review access is provided through the linked repository.</p>
+            <div class="hero-actions" style="margin-top:16px;">
+              <a class="button primary" href="https://anonymous.4open.science/r/FG-RSSA-code-2D45/README.md" target="_blank" rel="noreferrer">Anonymous Code Repository</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="results">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>Experimental Results</h2>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <p>Evaluation is reported with <strong>SRCC</strong> and <strong>MAE</strong>. The implementation uses a Kinetics-pretrained I3D backbone, a ResNet-34 tissue branch, Adam optimization, 8 cross-attention heads, 100 training epochs for simulation datasets, 150 epochs for clinical datasets, early stopping with patience 10, and 112 × 112 input frames. The paper reports 49.2M trainable parameters, 4.73 GB peak inference memory, 21 FPS inference speed, and a 452.57 MB checkpoint size.</p>
+          </div>
+
+          <div class="results-carousel reveal" data-carousel>
+            <div class="results-carousel-header">
+              <div class="section-heading" style="margin:0;">
+                <h3 style="margin:0; font-size:1.1rem;">Swipe Through Dataset Results</h3>
+              </div>
+              <div class="results-controls">
+                <button class="results-control" type="button" data-carousel-prev aria-label="Previous result">&#8592;</button>
+                <button class="results-control" type="button" data-carousel-next aria-label="Next result">&#8594;</button>
+              </div>
+            </div>
+
+            <div class="results-viewport">
+              <div class="results-track">
+                <article class="results-slide">
+                  <div class="results-slide-card">
+                    <h3>Results on the JIGSAWS Dataset</h3>
+                    <p>On JIGSAWS, the model maintains favorable ranking consistency across Knot Tying, Needle Passing, and Suturing under LOUO, LOSO, and randomized 4-fold cross-validation. Except for Suturing under LOUO, all SRCC values are above 0.80, the highest SRCC reaches 0.94, and the overall MAE range across tasks and settings is 1.43.</p>
+                    <div class="results-media-grid">
+                      <div class="media-card">
+                        <img src="static/images/figures/fig4.png" alt="JIGSAWS SRCC result distributions">
+                        <div class="caption">Fig. 4. Fold-wise SRCC variations across tasks and evaluation settings on the simulated dataset.</div>
+                      </div>
+                      <div class="media-card">
+                        <img src="static/images/figures/fig5.png" alt="JIGSAWS MAE metrics">
+                        <div class="caption">Fig. 5. Fold-wise MAE results across tasks and evaluation settings on the simulated dataset.</div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="results-slide">
+                  <div class="results-slide-card">
+                    <h3>Results on the ROSMA Dataset</h3>
+                    <p>On ROSMA, the proposed method maintains stable continuous score prediction and ranking consistency, with an overall average MAE of 2.546 and SRCC of 0.717. The best average performance is obtained under LOUO, while Wire Chaser achieves the highest task-level average SRCC.</p>
+                    <div class="results-media-single">
+                      <div class="media-card">
+                        <img src="static/images/figures/table2_rosma.png" alt="ROSMA result table">
+                        <div class="caption">Table II. Performance of the proposed framework on ROSMA under randomized 4-fold cross-validation, LOUO, and LOSO.</div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="results-slide">
+                  <div class="results-slide-card">
+                    <h3>Results on the HeiChole Dataset</h3>
+                    <p>On HeiChole, the method achieves an overall mean MAE of 0.97 and mean SRCC of 0.76 across Calot Triangle Dissection and Gallbladder Dissection, showing strong performance under realistic clinical visual complexity.</p>
+                    <div class="results-media-single">
+                      <div class="media-card">
+                        <img src="static/images/figures/fig6.png" alt="HeiChole results">
+                        <div class="caption">Fig. 6. Distribution of MAE and SRCC under randomized 4-fold cross-validation on the clinical cholecystectomy dataset.</div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="results-slide">
+                  <div class="results-slide-card">
+                    <h3>Results on the Private Hernia Repair Suturing Surgery Dataset</h3>
+                    <p>On the private hernia repair suturing dataset, randomized 4-fold cross-validation yields a mean MAE of 0.979 and mean SRCC of 0.737. Across folds, MAE ranges from 0.806 to 1.067 and SRCC ranges from 0.656 to 0.818, indicating stable regression and ranking performance.</p>
+                    <div class="results-media-single">
+                      <div class="media-card">
+                        <img src="static/images/figures/fig7.png" alt="Private hernia repair suturing results">
+                        <div class="caption">Fig. 7. MAE and SRCC distributions across 4-fold cross-validation on the private hernia repair suturing dataset.</div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="results-dots">
+              <button class="results-dot is-active" type="button" data-carousel-dot="0" aria-label="Go to JIGSAWS results"></button>
+              <button class="results-dot" type="button" data-carousel-dot="1" aria-label="Go to ROSMA results"></button>
+              <button class="results-dot" type="button" data-carousel-dot="2" aria-label="Go to HeiChole results"></button>
+              <button class="results-dot" type="button" data-carousel-dot="3" aria-label="Go to private hernia results"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="discussions">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>Discussions</h2>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Evaluation On The Selection Of Reference Video</h3>
+            <p>Using the highest-scoring reference video consistently gives the best performance, reducing MAE by 1.090 and 1.018 and improving SRCC by 40.80% and 26.80% relative to low- and intermediate-scoring references.</p>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/table5.png" alt="Reference video selection evaluation">
+            <div class="caption">Table V. Evaluation on the selection of reference video.</div>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>Evaluation On The Number Of Attention Heads</h3>
+            <p>The best average performance is obtained with 8 attention heads, while fewer heads limit representation diversity and too many heads reduce the feature capacity assigned to each attention subspace.</p>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/table6.png" alt="Attention head evaluation">
+            <div class="caption">Table VI. Evaluation on the number of attention heads.</div>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <h3>CAM Visualization of Tissue and Instrument Features</h3>
+            <p>CAM visualizations show that the model consistently focuses on instruments, tissue structures, and instrument-tissue interaction regions, supporting the interpretability of the proposed joint instrument-tissue modeling framework.</p>
+          </div>
+
+          <div class="figure-panel panel reveal">
+            <img src="static/images/figures/fig8.png" alt="CAM visualizations">
+            <div class="caption">Fig. 8. CAM visualizations of instrument features extracted by the mask-guided attention module and tissue features extracted by the intra-video contextual modeling module.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="cam">
+        <div class="section-inner">
+          <div class="section-heading reveal">
+            <h2>CAM GIF Demonstrations</h2>
+          </div>
+
+          <div class="panel copy-block reveal">
+            <p>The first three instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are more tightly focused on regions that are directly related to the surgical manipulation, indicating more accurate localization of skill-relevant visual cues. The fourth pair corresponds to a relatively weaker prediction case, where the highlighted regions are less precisely concentrated on the most operation-relevant areas.</p>
+          </div>
+
+          <div class="cam-grid reveal">
+            <div class="cam-pair">
+              <div class="cam-pair-grid">
+                <img src="static/images/cam_gifs/instru1.gif" alt="Instrument CAM 1">
+                <img src="static/images/cam_gifs/tissue1.gif" alt="Tissue CAM 1">
+              </div>
+              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
+            </div>
+            <div class="cam-pair">
+              <div class="cam-pair-grid">
+                <img src="static/images/cam_gifs/instru2.gif" alt="Instrument CAM 2">
+                <img src="static/images/cam_gifs/tissue2.gif" alt="Tissue CAM 2">
+              </div>
+              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
+            </div>
+            <div class="cam-pair">
+              <div class="cam-pair-grid">
+                <img src="static/images/cam_gifs/instru3.gif" alt="Instrument CAM 3">
+                <img src="static/images/cam_gifs/tissue3.gif" alt="Tissue CAM 3">
+              </div>
+              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
+            </div>
+            <div class="cam-pair">
+              <div class="cam-pair-grid">
+                <img src="static/images/cam_gifs/instru4.gif" alt="Instrument CAM 4">
+                <img src="static/images/cam_gifs/tissue4.gif" alt="Tissue CAM 4">
+              </div>
+              <small>Relatively weaker case: less precise focus on the most operation-relevant regions.</small>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>FG-RSSA project page</span>
+        <span>Built from repository content and paper-aligned README sections</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+      const track = carousel.querySelector('.results-track');
+      const slides = Array.from(carousel.querySelectorAll('.results-slide'));
+      const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+      const prev = carousel.querySelector('[data-carousel-prev]');
+      const next = carousel.querySelector('[data-carousel-next]');
+      let index = 0;
+
+      const render = () => {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('is-active', i === index);
+        });
+      };
+
+      prev?.addEventListener('click', () => {
+        index = (index - 1 + slides.length) % slides.length;
+        render();
+      });
+
+      next?.addEventListener('click', () => {
+        index = (index + 1) % slides.length;
+        render();
+      });
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          index = i;
+          render();
+        });
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>
