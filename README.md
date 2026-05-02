@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/images/fg_rssa_header.gif" alt="FG-RSSA animated header" width="88%">
+  <img src="static/images/fg_rssa_header.gif" alt="FG-RASA animated header" width="88%">
 </p>
 
 **[Paper](static/pdfs/paper.pdf)** | **[Code](https://github.com/FG-RASA/FG-RASA-code)** | **[Dataset](https://drive.google.com/file/d/1mSpWMD0sPyM1qY8sSMq9dmE1rbFfirPV/view?usp=sharing)**
