@@ -496,7 +496,7 @@
     }
 
     .cam-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       margin-top: 18px;
     }
 
@@ -506,10 +506,9 @@
       border: 1px solid rgba(255,255,255,0.08);
       background: #ffffff;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-      min-height: 356px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
     }
 
     .cam-pair-grid {
@@ -520,6 +519,10 @@
       align-items: start;
     }
 
+    .cam-pair-grid.cam-triplet-grid {
+      grid-template-columns: repeat(3, minmax(0, 112px));
+    }
+
     .cam-pair-grid img {
       background: #ffffff;
       border-radius: 12px;
@@ -527,13 +530,6 @@
       aspect-ratio: 1 / 1;
       object-fit: cover;
       display: block;
-    }
-
-    .cam-pair small {
-      display: block;
-      margin-top: 10px;
-      color: var(--muted);
-      text-align: center;
     }
 
     .section-anchor-nav {
@@ -591,17 +587,23 @@
       .cards-grid,
       .media-grid,
       .comparison-grid,
-      .cam-grid,
       .results-media-grid {
         grid-template-columns: 1fr;
       }
 
+      .cam-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .hero-card { padding: 24px; }
       .hero-copy h1 { font-size: clamp(1.85rem, 7vw, 3rem); }
-      .cam-pair-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
+      .cam-grid {
+        grid-template-columns: 1fr;
+      }
+
       .topbar-inner {
         align-items: flex-start;
         flex-direction: column;
@@ -901,7 +903,7 @@
           </div>
 
           <div class="panel copy-block reveal">
-            <p>The first three instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are more tightly focused on regions that are directly related to the surgical manipulation, indicating more accurate localization of skill-relevant visual cues. The fourth pair corresponds to a relatively weaker prediction case, where the highlighted regions are less precisely concentrated on the most operation-relevant areas.</p>
+            <p>The first four instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are tightly focused on regions directly related to the surgical manipulation, indicating accurate localization of skill-relevant visual cues. The two additional HeiChole examples present synchronized source frames, instrument CAMs, and overlays.</p>
           </div>
 
           <div class="cam-grid reveal">
@@ -910,28 +912,38 @@
                 <img src="static/images/cam_gifs/instru1.gif" alt="Instrument CAM 1">
                 <img src="static/images/cam_gifs/tissue1.gif" alt="Tissue CAM 1">
               </div>
-              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
             </div>
             <div class="cam-pair">
               <div class="cam-pair-grid">
                 <img src="static/images/cam_gifs/instru2.gif" alt="Instrument CAM 2">
                 <img src="static/images/cam_gifs/tissue2.gif" alt="Tissue CAM 2">
               </div>
-              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
             </div>
             <div class="cam-pair">
               <div class="cam-pair-grid">
                 <img src="static/images/cam_gifs/instru3.gif" alt="Instrument CAM 3">
                 <img src="static/images/cam_gifs/tissue3.gif" alt="Tissue CAM 3">
               </div>
-              <small>Lower-MAE case: more focused activation on operation-relevant regions.</small>
             </div>
             <div class="cam-pair">
               <div class="cam-pair-grid">
                 <img src="static/images/cam_gifs/instru4.gif" alt="Instrument CAM 4">
                 <img src="static/images/cam_gifs/tissue4.gif" alt="Tissue CAM 4">
               </div>
-              <small>Relatively weaker case: less precise focus on the most operation-relevant regions.</small>
+            </div>
+            <div class="cam-pair">
+              <div class="cam-pair-grid cam-triplet-grid">
+                <img src="static/images/cam_gifs/hei_chole20_frame.gif" alt="HeiChole 20 source frames">
+                <img src="static/images/cam_gifs/hei_chole20_instru.gif" alt="HeiChole 20 instrument CAM">
+                <img src="static/images/cam_gifs/hei_chole20_overlay.gif" alt="HeiChole 20 CAM overlay">
+              </div>
+            </div>
+            <div class="cam-pair">
+              <div class="cam-pair-grid cam-triplet-grid">
+                <img src="static/images/cam_gifs/hei_chole7_frame.gif" alt="HeiChole 7 source frames">
+                <img src="static/images/cam_gifs/hei_chole7_instru.gif" alt="HeiChole 7 instrument CAM">
+                <img src="static/images/cam_gifs/hei_chole7_overlay.gif" alt="HeiChole 7 CAM overlay">
+              </div>
             </div>
           </div>
         </div>
