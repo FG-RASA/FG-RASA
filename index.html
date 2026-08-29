@@ -496,7 +496,8 @@
     }
 
     .cam-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      --cam-gif-size: 240px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       margin-top: 18px;
     }
 
@@ -513,14 +514,14 @@
 
     .cam-pair-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 280px));
+      grid-template-columns: repeat(2, minmax(0, var(--cam-gif-size)));
       gap: 12px;
       justify-content: center;
       align-items: start;
     }
 
     .cam-pair-grid.cam-triplet-grid {
-      grid-template-columns: repeat(3, minmax(0, 280px));
+      grid-template-columns: repeat(3, minmax(0, var(--cam-gif-size)));
     }
 
     .cam-triplet-case {
