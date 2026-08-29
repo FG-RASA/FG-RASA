@@ -528,6 +528,19 @@
       grid-column: 1 / -1;
     }
 
+    .cam-case-label {
+      margin: 0 0 12px;
+      color: #1d2a3a;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .cam-case-label span {
+      margin-left: 8px;
+      color: #087e9e;
+    }
+
     .cam-pair-grid img {
       background: #ffffff;
       border-radius: 12px;
@@ -908,7 +921,8 @@
           </div>
 
           <div class="panel copy-block reveal">
-            <p>The first four instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are tightly focused on regions directly related to the surgical manipulation, indicating accurate localization of skill-relevant visual cues. The two additional HeiChole examples present synchronized source frames, instrument CAMs, and overlays.</p>
+            <p>The first four instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are tightly focused on regions directly related to the surgical manipulation, indicating accurate localization of skill-relevant visual cues.</p>
+            <p>The two additional HeiChole videos present representative high-error cases affected by surgical smoke (MAE = 2.43) and bleeding (MAE = 2.76), with synchronized source frames, instrument CAMs, and overlays. As visibility deteriorates, the CAM responses become more dispersed and increasingly influenced by bright regions, blood-covered areas, specular reflections, and instrument edges, illustrating the model's dependence on a clear operative field and visible instrument-tissue interactions.</p>
           </div>
 
           <div class="cam-grid reveal">
@@ -937,6 +951,7 @@
               </div>
             </div>
             <div class="cam-pair cam-triplet-case">
+              <div class="cam-case-label">Smoke-affected case <span>MAE = 2.43</span></div>
               <div class="cam-pair-grid cam-triplet-grid">
                 <img src="static/images/cam_gifs/hei_chole20_frame.gif" alt="HeiChole 20 source frames">
                 <img src="static/images/cam_gifs/hei_chole20_instru.gif" alt="HeiChole 20 instrument CAM">
@@ -944,6 +959,7 @@
               </div>
             </div>
             <div class="cam-pair cam-triplet-case">
+              <div class="cam-case-label">Bleeding-affected case <span>MAE = 2.76</span></div>
               <div class="cam-pair-grid cam-triplet-grid">
                 <img src="static/images/cam_gifs/hei_chole7_frame.gif" alt="HeiChole 7 source frames">
                 <img src="static/images/cam_gifs/hei_chole7_instru.gif" alt="HeiChole 7 instrument CAM">
