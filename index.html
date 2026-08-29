@@ -520,7 +520,11 @@
     }
 
     .cam-pair-grid.cam-triplet-grid {
-      grid-template-columns: repeat(3, minmax(0, 112px));
+      grid-template-columns: repeat(3, minmax(0, 280px));
+    }
+
+    .cam-triplet-case {
+      grid-column: 1 / -1;
     }
 
     .cam-pair-grid img {
@@ -931,14 +935,14 @@
                 <img src="static/images/cam_gifs/tissue4.gif" alt="Tissue CAM 4">
               </div>
             </div>
-            <div class="cam-pair">
+            <div class="cam-pair cam-triplet-case">
               <div class="cam-pair-grid cam-triplet-grid">
                 <img src="static/images/cam_gifs/hei_chole20_frame.gif" alt="HeiChole 20 source frames">
                 <img src="static/images/cam_gifs/hei_chole20_instru.gif" alt="HeiChole 20 instrument CAM">
                 <img src="static/images/cam_gifs/hei_chole20_overlay.gif" alt="HeiChole 20 CAM overlay">
               </div>
             </div>
-            <div class="cam-pair">
+            <div class="cam-pair cam-triplet-case">
               <div class="cam-pair-grid cam-triplet-grid">
                 <img src="static/images/cam_gifs/hei_chole7_frame.gif" alt="HeiChole 7 source frames">
                 <img src="static/images/cam_gifs/hei_chole7_instru.gif" alt="HeiChole 7 instrument CAM">
