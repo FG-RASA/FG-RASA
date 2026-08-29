@@ -528,6 +528,10 @@
       grid-column: 1 / -1;
     }
 
+    .cam-triplet-description {
+      grid-column: 1 / -1;
+    }
+
     .cam-case-label {
       margin: 0 0 12px;
       color: #1d2a3a;
@@ -922,7 +926,6 @@
 
           <div class="panel copy-block reveal">
             <p>The first four instrument-tissue CAM pairs correspond to lower-MAE cases. Their activation patterns are tightly focused on regions directly related to the surgical manipulation, indicating accurate localization of skill-relevant visual cues.</p>
-            <p>The two additional HeiChole videos present representative high-error cases affected by surgical smoke (MAE = 2.43) and bleeding (MAE = 2.76), with synchronized source frames, instrument CAMs, and overlays. As visibility deteriorates, the CAM responses become more dispersed and increasingly influenced by bright regions, blood-covered areas, specular reflections, and instrument edges, illustrating the model's dependence on a clear operative field and visible instrument-tissue interactions.</p>
           </div>
 
           <div class="cam-grid reveal">
@@ -949,6 +952,9 @@
                 <img src="static/images/cam_gifs/instru4.gif" alt="Instrument CAM 4">
                 <img src="static/images/cam_gifs/tissue4.gif" alt="Tissue CAM 4">
               </div>
+            </div>
+            <div class="panel copy-block cam-triplet-description">
+              <p>The two additional HeiChole videos present representative high-error cases affected by surgical smoke (MAE = 2.43) and bleeding (MAE = 2.76), with synchronized source frames, instrument CAMs, and overlays. As visibility deteriorates, the CAM responses become more dispersed and increasingly influenced by bright regions, blood-covered areas, specular reflections, and instrument edges, illustrating the model's dependence on a clear operative field and visible instrument-tissue interactions.</p>
             </div>
             <div class="cam-pair cam-triplet-case">
               <div class="cam-case-label">Smoke-affected case <span>MAE = 2.43</span></div>
